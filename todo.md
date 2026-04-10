@@ -64,3 +64,6 @@ https://medium.com/@adityaghadge99/python-project-structure-why-the-src-layout-b
 проверить что uv не ломается если делаем flat repository
 
 
+---------
+
+добавить файл на который будет смотреть копилот ревьюер
