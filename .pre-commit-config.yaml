@@ -3,7 +3,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: no-commit-to-branch
-        args: [ "--branch", "main" ]
+        args: ["--branch", "main"]
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
@@ -13,15 +13,22 @@ repos:
       - id: check-symlinks
       - id: check-case-conflict
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.10
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-
   - repo: local
     hooks:
+      - id: ruff-check-all
+        name: ruff check (all files)
+        entry: uv run ruff check . --fix
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
+
+      - id: ruff-format-all
+        name: ruff format (all files)
+        entry: uv run ruff format .
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
+
       - id: mypy
         name: mypy
         entry: uv run mypy .
