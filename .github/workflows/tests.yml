@@ -17,20 +17,25 @@ jobs:
         with:
           python-version-file: .python-version
 
-      - name: download_uv
+      - name: Install uv and project dependencies
         run: |
-          pip install uv
-          uv sync --all-extras
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv sync --group dev
 
-      - name: lint
-        run: |
-          uv run ruff check .
-          uv run black --check .
-          uv run mypy .
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: mypy
+        run: uv run mypy .
 
   test:
     runs-on: ubuntu-latest
     needs: lint
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,17 +43,18 @@ jobs:
         with:
           python-version-file: .python-version
 
-      - name: download_uv
+      - name: Install uv and project dependencies
         run: |
-          pip install uv
-          uv sync --all-extras
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv sync --group dev
 
-      - name: tests
+      - name: pytest
         run: |
           uv run pytest \
-          --cov=. \
-          --no-cov-on-fail \
-          --junitxml=report.xml \
-          --cov-report html:htmlcov \
-          --cov-report xml:coverage.xml \
-          --cov-report term .
+            --cov=. \
+            --no-cov-on-fail \
+            --junitxml=report.xml \
+            --cov-report html:htmlcov \
+            --cov-report xml:coverage.xml \
+            --cov-report term

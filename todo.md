@@ -17,7 +17,7 @@ https://medium.com/@adityaghadge99/python-project-structure-why-the-src-layout-b
 переработать инструкций по первому запуску
 
 
------ 
+-----
 
 дописать какие ожидания из tg bot из ридми что студент имеет
 
@@ -31,7 +31,7 @@ https://medium.com/@adityaghadge99/python-project-structure-why-the-src-layout-b
 --------
 
 
-пул реквест темплейт пофиксить 
+пул реквест темплейт пофиксить
 
 
 ------
@@ -47,14 +47,6 @@ https://medium.com/@adityaghadge99/python-project-structure-why-the-src-layout-b
 -----
 
 описать флоу работы с проектом относительно гит, а не просто набор сухих команд
-
-----
-
-
-отредактировать пре коммит конфиг, уточнить набор инструментов
-
-странный пре коммит
-
 
 
 ------
