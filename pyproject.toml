@@ -52,8 +52,6 @@ select = [
 ]
 ignore = [
     "E501",    # line length is formatter territory
-    "ANN101",  # do not require self annotation
-    "ANN102",  # do not require cls annotation
     "ANN401",  # do not ban Any globally at template level
 ]
 
