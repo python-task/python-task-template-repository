@@ -93,11 +93,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      issues: write
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -157,69 +152,55 @@ jobs:
             htmlcov
           if-no-files-found: ignore
 
-      - name: Wait for lint job completion
-        id: wait_for_lint
-        if: ${{ always() }}
-        uses: actions/github-script@v8
+      - name: Fail job if tests failed
+        if: ${{ steps.sync.outcome == 'failure' || steps.pytest.outcome == 'failure' }}
+        run: exit 1
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: ${{ always() }}
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
         with:
-          script: |
-            const runId = Number(process.env.GITHUB_RUN_ID);
-            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-            const maxAttempts = 80;
+          python-version-file: .python-version
 
-            for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-              const jobs = await github.paginate(
-                github.rest.actions.listJobsForWorkflowRun,
-                {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  run_id: runId,
-                  per_page: 100,
-                  filter: "latest",
-                },
-              );
-
-              const lintJob = jobs.find((job) => job.name === "lint");
-
-              if (lintJob?.status === "completed") {
-                core.setOutput("completed", "true");
-                core.setOutput("conclusion", lintJob.conclusion || "unknown");
-                return;
-              }
-
-              if (attempt < maxAttempts) {
-                await sleep(15000);
-              }
-            }
-
-            core.setOutput("completed", "false");
-            core.setOutput("conclusion", "timed_out");
-
-      - name: Download lint results
-        if: ${{ always() && steps.wait_for_lint.outputs.completed == 'true' }}
+      - uses: actions/download-artifact@v5
         continue-on-error: true
-        uses: actions/download-artifact@v5
         with:
           name: lint-results
           path: .artifacts/lint-results
 
+      - uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          name: test-results
+          path: .artifacts/test-results
+
       - name: Build CI summary
-        if: ${{ always() }}
         env:
-          LINT_JOB_CONCLUSION: ${{ steps.wait_for_lint.outputs.conclusion }}
+          LINT_JOB_CONCLUSION: ${{ needs.lint.result }}
+          TEST_JOB_CONCLUSION: ${{ needs.test.result }}
         run: |
           python .github/scripts/ci_report.py render \
             --lint-metadata .artifacts/lint-results/lint-metadata.json \
-            --test-metadata .ci/test-metadata.json \
+            --test-metadata .artifacts/test-results/test-metadata.json \
             --summary-file .ci/ci-summary.md \
             --comment-file .ci/pr-comment.md
 
       - name: Publish workflow summary
-        if: ${{ always() }}
         run: cat .ci/ci-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment summary in PR
-        if: ${{ always() && github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
         uses: actions/github-script@v8
         env:
@@ -260,7 +241,3 @@ jobs:
                 body,
               });
             }
-
-      - name: Fail job if tests failed
-        if: ${{ steps.sync.outcome == 'failure' || steps.pytest.outcome == 'failure' }}
-        run: exit 1

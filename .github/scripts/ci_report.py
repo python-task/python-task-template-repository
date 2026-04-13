@@ -217,7 +217,7 @@ def render_report(
     test_metadata = _load_metadata(test_metadata_path)
 
     lint_status = _compute_job_status(lint_metadata, os.getenv("LINT_JOB_CONCLUSION"))
-    test_status = _compute_job_status(test_metadata)
+    test_status = _compute_job_status(test_metadata, os.getenv("TEST_JOB_CONCLUSION"))
 
     run_url = (
         f"{os.getenv('GITHUB_SERVER_URL', 'https://github.com')}/"
@@ -255,10 +255,10 @@ def render_report(
         lines.extend(["### Checks", ""])
         lines.extend(check_rows)
         lines.append("")
-    elif lint_status != "success":
+    elif lint_status != "success" or test_status != "success":
         lines.extend(
             [
-                "Lint details artifact was not available. Inspect the lint job log on the workflow run page.",
+                "Detailed artifacts were not fully available. Inspect the workflow run page for raw job logs.",
                 "",
             ]
         )
