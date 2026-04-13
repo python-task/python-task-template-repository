@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          uv run ruff check . 2>&1 | tee .ci/ruff-check.log
+          uv run ruff check . --no-fix 2>&1 | tee .ci/ruff-check.log
 
       - name: Ruff format check
         id: ruff_format
