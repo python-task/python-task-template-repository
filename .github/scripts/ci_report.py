@@ -130,51 +130,67 @@ def _tail_excerpt(path: Path, max_lines: int = 40, max_chars: int = 5000) -> str
     return excerpt
 
 
-def _parse_coverage(path: Path) -> dict[str, Any] | None:
+def _parse_xml_root(path: Path) -> ET.Element | None:
     if not path.exists():
         return None
 
-    root = ET.parse(path).getroot()
-    return {
-        "line_rate": float(root.attrib.get("line-rate", 0.0)) * 100,
-        "branch_rate": float(root.attrib.get("branch-rate", 0.0)) * 100,
-        "lines_covered": int(root.attrib.get("lines-covered", 0)),
-        "lines_valid": int(root.attrib.get("lines-valid", 0)),
-        "branches_covered": int(root.attrib.get("branches-covered", 0)),
-        "branches_valid": int(root.attrib.get("branches-valid", 0)),
-    }
+    try:
+        return ET.parse(path).getroot()
+    except (ET.ParseError, OSError, ValueError):
+        return None
+
+
+def _parse_coverage(path: Path) -> dict[str, Any] | None:
+    root = _parse_xml_root(path)
+    if root is None:
+        return None
+
+    try:
+        return {
+            "line_rate": float(root.attrib.get("line-rate", 0.0)) * 100,
+            "branch_rate": float(root.attrib.get("branch-rate", 0.0)) * 100,
+            "lines_covered": int(root.attrib.get("lines-covered", 0)),
+            "lines_valid": int(root.attrib.get("lines-valid", 0)),
+            "branches_covered": int(root.attrib.get("branches-covered", 0)),
+            "branches_valid": int(root.attrib.get("branches-valid", 0)),
+        }
+    except ValueError:
+        return None
 
 
 def _parse_junit(path: Path) -> dict[str, Any] | None:
-    if not path.exists():
+    root = _parse_xml_root(path)
+    if root is None:
         return None
 
-    root = ET.parse(path).getroot()
     suites = [root] if root.tag.endswith("testsuite") else list(root.findall(".//testsuite"))
     if not suites:
         return None
 
-    tests = sum(int(suite.attrib.get("tests", 0)) for suite in suites)
-    failures = sum(int(suite.attrib.get("failures", 0)) for suite in suites)
-    errors = sum(int(suite.attrib.get("errors", 0)) for suite in suites)
-    skipped = sum(int(suite.attrib.get("skipped", 0)) for suite in suites)
-    duration = sum(float(suite.attrib.get("time", 0.0)) for suite in suites)
+    try:
+        tests = sum(int(suite.attrib.get("tests", 0)) for suite in suites)
+        failures = sum(int(suite.attrib.get("failures", 0)) for suite in suites)
+        errors = sum(int(suite.attrib.get("errors", 0)) for suite in suites)
+        skipped = sum(int(suite.attrib.get("skipped", 0)) for suite in suites)
+        duration = sum(float(suite.attrib.get("time", 0.0)) for suite in suites)
 
-    if tests == 0 and root.attrib:
-        tests = int(root.attrib.get("tests", 0))
-        failures = int(root.attrib.get("failures", 0))
-        errors = int(root.attrib.get("errors", 0))
-        skipped = int(root.attrib.get("skipped", 0))
-        duration = float(root.attrib.get("time", 0.0))
+        if tests == 0 and root.attrib:
+            tests = int(root.attrib.get("tests", 0))
+            failures = int(root.attrib.get("failures", 0))
+            errors = int(root.attrib.get("errors", 0))
+            skipped = int(root.attrib.get("skipped", 0))
+            duration = float(root.attrib.get("time", 0.0))
 
-    return {
-        "tests": tests,
-        "failures": failures,
-        "errors": errors,
-        "skipped": skipped,
-        "passed": max(tests - failures - errors - skipped, 0),
-        "duration": duration,
-    }
+        return {
+            "tests": tests,
+            "failures": failures,
+            "errors": errors,
+            "skipped": skipped,
+            "passed": max(tests - failures - errors - skipped, 0),
+            "duration": duration,
+        }
+    except ValueError:
+        return None
 
 
 def _build_failure_sections(
