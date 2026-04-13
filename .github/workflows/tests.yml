@@ -33,9 +33,9 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          mkdir -p .ci
+          mkdir -p ci-artifacts/lint
           set -o pipefail
-          uv sync --locked --group dev 2>&1 | tee .ci/lint-sync.log
+          uv sync --locked --group dev 2>&1 | tee ci-artifacts/lint/lint-sync.log
 
       - name: Ruff check
         id: ruff_check
@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          uv run ruff check . --no-fix 2>&1 | tee .ci/ruff-check.log
+          uv run ruff check . --no-fix 2>&1 | tee ci-artifacts/lint/ruff-check.log
 
       - name: Ruff format check
         id: ruff_format
@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          uv run ruff format --check . 2>&1 | tee .ci/ruff-format.log
+          uv run ruff format --check . 2>&1 | tee ci-artifacts/lint/ruff-format.log
 
       - name: mypy
         id: mypy
@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          uv run mypy . 2>&1 | tee .ci/mypy.log
+          uv run mypy . 2>&1 | tee ci-artifacts/lint/mypy.log
 
       - name: Write lint metadata
         if: ${{ always() }}
@@ -72,19 +72,14 @@ jobs:
           RUFF_FORMAT_OUTCOME: ${{ steps.ruff_format.outcome }}
           MYPY_OUTCOME: ${{ steps.mypy.outcome }}
         run: |
-          python .github/scripts/ci_report.py write-lint-metadata --output .ci/lint-metadata.json
+          python .github/scripts/ci_report.py write-lint-metadata --output ci-artifacts/lint/lint-metadata.json
 
       - name: Upload lint results
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: lint-results
-          path: |
-            .ci/lint-sync.log
-            .ci/ruff-check.log
-            .ci/ruff-format.log
-            .ci/mypy.log
-            .ci/lint-metadata.json
+          path: ci-artifacts/lint/
           if-no-files-found: ignore
 
       - name: Fail job if lint failed
@@ -110,9 +105,9 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          mkdir -p .ci
+          mkdir -p ci-artifacts/test
           set -o pipefail
-          uv sync --locked --group dev 2>&1 | tee .ci/test-sync.log
+          uv sync --locked --group dev 2>&1 | tee ci-artifacts/test/test-sync.log
 
       - name: pytest
         id: pytest
@@ -124,11 +119,11 @@ jobs:
           uv run pytest \
             --cov=. \
             --no-cov-on-fail \
-            --junitxml=.ci/report.xml \
-            --cov-report html:htmlcov \
-            --cov-report xml:.ci/coverage.xml \
+            --junitxml=ci-artifacts/test/report.xml \
+            --cov-report html:ci-artifacts/test/htmlcov \
+            --cov-report xml:ci-artifacts/test/coverage.xml \
             --cov-report term \
-            2>&1 | tee .ci/pytest.log
+            2>&1 | tee ci-artifacts/test/pytest.log
 
       - name: Write test metadata
         if: ${{ always() }}
@@ -136,20 +131,14 @@ jobs:
           SYNC_OUTCOME: ${{ steps.sync.outcome }}
           PYTEST_OUTCOME: ${{ steps.pytest.outcome }}
         run: |
-          python .github/scripts/ci_report.py write-test-metadata --output .ci/test-metadata.json
+          python .github/scripts/ci_report.py write-test-metadata --output ci-artifacts/test/test-metadata.json
 
       - name: Upload test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            .ci/test-sync.log
-            .ci/pytest.log
-            .ci/report.xml
-            .ci/coverage.xml
-            .ci/test-metadata.json
-            htmlcov
+          path: ci-artifacts/test/
           if-no-files-found: ignore
 
       - name: Fail job if tests failed
@@ -193,18 +182,18 @@ jobs:
           python .github/scripts/ci_report.py render \
             --lint-metadata .artifacts/lint-results/lint-metadata.json \
             --test-metadata .artifacts/test-results/test-metadata.json \
-            --summary-file .ci/ci-summary.md \
-            --comment-file .ci/pr-comment.md
+            --summary-file ci-report/ci-summary.md \
+            --comment-file ci-report/pr-comment.md
 
       - name: Publish workflow summary
-        run: cat .ci/ci-summary.md >> "$GITHUB_STEP_SUMMARY"
+        run: cat ci-report/ci-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment summary in PR
         if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
         uses: actions/github-script@v8
         env:
-          COMMENT_PATH: .ci/pr-comment.md
+          COMMENT_PATH: ci-report/pr-comment.md
         with:
           script: |
             const fs = require("fs");
