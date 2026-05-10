@@ -1,0 +1,79 @@
+# Локальный контракт синхронизации для бота обновлений из template.
+# После создания student repo этот файл становится собственностью student repo.
+# Подробнее: раздел "Автосинхронизация из template" в INSTRUCTIONS.md
+
+version: "1"
+
+template:
+  source_branch: main
+
+target:
+  base_branch: main
+
+project:
+  # Значение YOUR_APP_NAME_RENAME_ME — сигнал безопасного режима:
+  # бот не будет удалять неизвестные top-level Python packages.
+  # Обновлять это поле не нужно.
+  app_package: YOUR_APP_NAME_RENAME_ME
+
+pull_request:
+  title: "chore: sync changes from template"
+  labels:
+    - template-sync
+
+sync:
+  # Allowlist: бот синхронизирует все пути по умолчанию.
+  include:
+    - "**"
+
+  # Blacklist: пути из exclude бот не трогает — не меняет, не удаляет,
+  # не восстанавливает из template. exclude имеет приоритет над include.
+  exclude:
+    # Этот файл — локальный контракт student repo, не обновлять из template.
+    - ".template-sync.yml"
+
+    # Git internals.
+    - ".git/**"
+
+    # Секреты и локальные env-файлы.
+    - ".env"
+    - ".env.*"
+
+    # Локальные окружения и кэши инструментов.
+    - ".venv/**"
+    - ".idea/**"
+    - ".vscode/**"
+    - "__pycache__/**"
+    - "*.pyc"
+    - ".pytest_cache/**"
+    - ".mypy_cache/**"
+    - ".ruff_cache/**"
+    - "htmlcov/**"
+    - "dist/**"
+    - "build/**"
+    - ".coverage"
+    - "coverage.xml"
+
+    # Lock-файл принадлежит student repo (фиксирует его зависимости).
+    - "uv.lock"
+
+    # Документация student repo.
+    - "README.md"
+    - "task.md"
+
+    # Шаблонная директория пакета — студент переименует её, бот не должен
+    # пытаться синхронизировать оригинальное имя в переименованный repo.
+    - "YOUR_APP_NAME_RENAME_ME/**"
+
+    # Код и тесты student — source of truth в student repo.
+    - "tests/**"
+
+  deletion:
+    # Удалять файлы из student repo, если они исчезли из template,
+    # только если они не попали в exclude.
+    enabled: true
+
+safety:
+  # Бот не создаёт PR, если изменений больше указанного числа файлов.
+  # Защита от случайного mass-update при ошибке в конфиге.
+  max_changed_files: 100
