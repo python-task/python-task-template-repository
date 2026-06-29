@@ -6,12 +6,21 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
 
+[project.scripts]
+pip = "_template_pip_guard:main"
+pip3 = "_template_pip_guard:main"
+
+[build-system]
+requires = ["uv_build>=0.11.19,<0.12"]
+build-backend = "uv_build"
+
 [dependency-groups]
 dev = [
     "mypy==1.20.0",
-    "pre-commit==4.5.1",
+    "prek==0.4.5",
     "pytest>=9.0.2",
     "pytest-cov==6.0.0",
+    "pytest-mock>=3.15.1",
     "ruff==0.15.10",
 ]
 
@@ -48,11 +57,17 @@ select = [
     "BLE",     # blind except
     "N",       # pep8-naming
     "RUF",     # Ruff-specific rules
+    "PT",      # flake8-pytest-style
     "TID251",  # banned-api
 ]
 ignore = [
     "E501",    # line length is formatter territory
     "ANN401",  # do not ban Any globally at template level
+    "RUF002",  # allow ambiguous unicode characters in docstrings
+    "PT001",   # both @pytest.fixture and @pytest.fixture() are acceptable
+    "PT009",   # contradicts TID251: TID251 bans TestCase; PT009 advises keeping it
+    "PT011",   # match= not required in educational tests
+    "PT013",   # from pytest import X is acceptable alongside import pytest
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -74,6 +89,10 @@ allow-star-arg-any = false
 "typing.Tuple".msg = "Use tuple[...] instead."
 "typing.Type".msg = "Use type[...] instead."
 "typing.Union".msg = "Use X | Y instead."
+"unittest".msg = "Use pytest-style tests and pytest-mock for mocking instead of unittest."
+"nose".msg = "Use pytest instead of nose."
+"nose2".msg = "Use pytest instead of nose2."
+"unittest2".msg = "Use pytest instead of unittest2."
 
 [tool.ruff.format]
 quote-style = "double"
@@ -107,3 +126,7 @@ ignore_missing_imports = false
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 # Тесты тоже должны быть типизированы, поэтому послаблений тут нет.
+
+[tool.uv.build-backend]
+module-name = "_template_pip_guard"
+module-root = ""
