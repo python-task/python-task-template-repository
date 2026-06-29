@@ -48,6 +48,7 @@ select = [
     "BLE",     # blind except
     "N",       # pep8-naming
     "RUF",     # Ruff-specific rules
+    "PT",      # flake8-pytest-style
     "TID251",  # banned-api
 ]
 ignore = [
@@ -74,6 +75,39 @@ allow-star-arg-any = false
 "typing.Tuple".msg = "Use tuple[...] instead."
 "typing.Type".msg = "Use type[...] instead."
 "typing.Union".msg = "Use X | Y instead."
+"unittest.TestCase".msg = "Use pytest-style function tests instead of unittest.TestCase."
+"unittest.IsolatedAsyncioTestCase".msg = "Use pytest async tests instead of unittest.IsolatedAsyncioTestCase."
+"unittest.FunctionTestCase".msg = "Use pytest-style function tests instead of unittest.FunctionTestCase."
+"unittest.case".msg = "Do not import unittest.case; use pytest-style tests instead."
+"unittest.async_case".msg = "Do not import unittest.async_case; use pytest async tests instead."
+"unittest.main".msg = "Use uv run pytest instead of the unittest runner."
+"unittest.defaultTestLoader".msg = "Use pytest collection instead of unittest.defaultTestLoader."
+"unittest.TestLoader".msg = "Use pytest collection instead of unittest.TestLoader."
+"unittest.TestSuite".msg = "Use pytest collection instead of unittest.TestSuite."
+"unittest.TestResult".msg = "Use pytest reporting instead of unittest.TestResult."
+"unittest.TextTestResult".msg = "Use pytest reporting instead of unittest.TextTestResult."
+"unittest.TextTestRunner".msg = "Use uv run pytest instead of unittest.TextTestRunner."
+"unittest.loader".msg = "Do not import unittest.loader; use pytest collection instead."
+"unittest.suite".msg = "Do not import unittest.suite; use pytest collection instead."
+"unittest.result".msg = "Do not import unittest.result; use pytest reporting instead."
+"unittest.runner".msg = "Do not import unittest.runner; use uv run pytest instead."
+"unittest.signals".msg = "Do not import unittest.signals; use the pytest runner instead."
+"unittest.util".msg = "Do not import unittest.util; use pytest-style tests instead."
+"unittest.SkipTest".msg = "Use pytest.skip instead of unittest.SkipTest."
+"unittest.skip".msg = "Use pytest.mark.skip instead of unittest.skip."
+"unittest.skipIf".msg = "Use pytest.mark.skipif instead of unittest.skipIf."
+"unittest.skipUnless".msg = "Use pytest.mark.skipif instead of unittest.skipUnless."
+"unittest.expectedFailure".msg = "Use pytest.mark.xfail instead of unittest.expectedFailure."
+"unittest.addModuleCleanup".msg = "Use pytest fixtures and finalizers instead of unittest.addModuleCleanup."
+"unittest.doModuleCleanups".msg = "Use pytest fixtures and finalizers instead of unittest.doModuleCleanups."
+"unittest.enterModuleContext".msg = "Use pytest fixtures instead of unittest.enterModuleContext."
+"unittest.installHandler".msg = "Use the pytest runner instead of unittest.installHandler."
+"unittest.registerResult".msg = "Use pytest reporting instead of unittest.registerResult."
+"unittest.removeResult".msg = "Use pytest reporting instead of unittest.removeResult."
+"unittest.removeHandler".msg = "Use the pytest runner instead of unittest.removeHandler."
+"nose".msg = "Use pytest instead of nose."
+"nose2".msg = "Use pytest instead of nose2."
+"unittest2".msg = "Use pytest instead of unittest2."
 
 [tool.ruff.format]
 quote-style = "double"
