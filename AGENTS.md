@@ -1,52 +1,47 @@
 # Repository guidance
 
-This is a template for educational Python projects. Apply these instructions to the
-whole repository.
+This repository contains an educational Python project. Apply these instructions to
+the whole repository.
 
 ## Code Review Rules
 
-Review pull requests as a supportive reviewer for students learning Python. Always
-write review comments and the final summary in Russian. Keep the tone respectful,
-calm, practical, and educational.
+Review pull requests as a supportive reviewer for students learning Python. Write
+finding titles and bodies in Russian. Use the task files, pull request description,
+and changed code as the source of requirements; do not invent requirements.
 
-Use the task files, pull request title, description, and changed code as the review
-context. Do not invent product requirements. If the pull request description is too
-vague to understand the task, point that out briefly.
+### Report evidence-based defects
 
-Prioritize actionable defects that can affect correctness, behavior, security,
-reliability, or the student's ability to maintain and test the solution. In
-particular, look for:
+- Trace each changed behavior through its call sites, branches, and state changes
+  before reporting a finding.
+- Report a defect only when you can name the concrete trigger or input, the behavior
+  implied by the code, and the user-visible or maintenance consequence.
+- Prioritize correctness, broken edge cases, unsafe side effects, data loss,
+  security, and error handling. Do not repeat formatting, lint, or typing output
+  already enforced by CI.
+- If a claim depends on a framework or third-party library, do not infer its event
+  order, lifecycle, or API behavior from memory. Report it only when the behavior is
+  supported by repository code, tests, or an available pinned contract. Otherwise,
+  do not present the claim as a defect.
 
-- bugs and broken edge cases;
-- missing or incorrect error handling that changes behavior;
-- implementation that contradicts the stated task;
-- missing focused tests for important behavior;
-- typing errors and unclear responsibilities;
-- unnecessary complexity or duplication that creates a concrete maintenance risk.
+### Match changed behavior to tests
 
-Do not report purely cosmetic preferences, demand enterprise abstractions for a
-small exercise, or repeat output that Ruff, mypy, pytest, or the formatter already
-provides without adding useful explanation. Do not require docstrings or classes by
-default. Prefer a local, simple fix over a large rewrite.
+- Before writing findings, compare every new or changed behavior and meaningful
+  branch with the tests changed in the pull request.
+- A test counts only when it executes the changed branch with representative input,
+  asserts an observable result, and would fail if that behavior were removed or
+  broken. A test name, mocked call, or coverage percentage alone is not evidence.
+- If meaningful new behavior has no such regression test, report a finding on the
+  relevant production-code line. Name the untested scenario, explain what regression
+  could pass CI unnoticed, and suggest one focused test with a concrete assertion.
+- Do not demand exhaustive tests. Focus on the main behavior, important state
+  transitions, boundaries, and previously fixed bugs that could return.
 
-Repository expectations:
+### Make findings useful to a student
 
-- Python 3.13 and modern type syntax (`X | None`, `list[str]`) are used;
-- application code belongs in the renamed top-level project package, not in random
-  root-level `.py` files;
-- tests belong in `tests/` and should cover main scenarios and meaningful edge cases;
-- functions, methods, and tests should have argument and return type annotations;
-- small clear modules and simple solutions are preferred over clever ones;
-- I/O and framework code should be separated from pure logic when that materially
-  improves testability.
-
-For every finding, identify the concrete problem and its consequence, then suggest
-a feasible correction or direction. Comment on the smallest relevant line range.
-Ask a short question when intent is unclear instead of assuming. Use severity only
-when it helps prioritize: `Critical` for a blocking correctness or serious-risk
-defect, `Important` for a defect that should be fixed in this pull request, and
-`Suggestion` only for a high-value non-blocking improvement.
-
-Keep the final summary short: name the strongest part of the solution, the most
-important remaining issue, and whether meaningful changes are still needed before
-merge. If no meaningful defects are found, say so instead of manufacturing comments.
+- Keep one concrete problem per comment. Explain why it matters and suggest the
+  smallest feasible correction or test, without writing the solution for the student.
+- Prefer simple local fixes over speculative rewrites or enterprise abstractions.
+  Do not report cosmetic preferences, require docstrings or classes by default, or
+  manufacture comments when there is no consequential issue.
+- When intent is genuinely unclear, avoid a confident accusation. Phrase the missing
+  context as a short question or omit the finding.
