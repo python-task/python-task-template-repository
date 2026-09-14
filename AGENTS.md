@@ -40,6 +40,13 @@ and changed code as the source of requirements; do not invent requirements.
 
 - Keep one concrete problem per comment. Explain why it matters and suggest the
   smallest feasible correction or test, without writing the solution for the student.
+- Start every finding body with exactly one visible marker: `**Приоритет: высокий.**`,
+  `**Приоритет: средний.**`, or `**Приоритет: низкий.**`. Use high for a broken main
+  scenario, mandatory requirement, data loss, or material security risk; medium for
+  an incorrect real edge case; low for a local reliability or maintainability risk.
+- After the marker, use 2–5 short Russian sentences: name the trigger, explain the
+  consequence, connect it to the engineering idea worth learning, and suggest one
+  minimal next step or focused test.
 - Prefer simple local fixes over speculative rewrites or enterprise abstractions.
   Do not report cosmetic preferences, require docstrings or classes by default, or
   manufacture comments when there is no consequential issue.
