@@ -25,7 +25,7 @@ dev = [
 ]
 
 [tool.coverage.run]
-omit = ["ui/*"]
+omit = ["YOUR_APP_NAME_RENAME_ME/ui/*"]
 
 [tool.ruff]
 line-length = 100
