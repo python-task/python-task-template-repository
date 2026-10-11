@@ -67,6 +67,7 @@ ignore = [
     "E501",    # line length is formatter territory
     "ANN401",  # do not ban Any globally at template level
     "RUF002",  # allow ambiguous unicode characters in docstrings
+    "RUF001",  # allow ambiguous unicode characters in docstrings
     "PT001",   # both @pytest.fixture and @pytest.fixture() are acceptable
     "PT009",   # contradicts TID251: TID251 bans TestCase; PT009 advises keeping it
     "PT011",   # match= not required in educational tests
